@@ -27,6 +27,9 @@ jobs:
       - name: Run tests
         working-directory: api
         run: pytest tests/ -v --tb=short
+        env:
+          DATABASE_URL: "sqlite:///./test.db"
+          SECRET_KEY: "test-secret-key"
 
   # ── Frontend tests ───────────────────────────────────────────────────────────
   test-app:
