@@ -1,0 +1,28 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.database import Base, engine
+from app.views import auth, materias, inscripciones, entregas, avisos
+import app.models  # importa todos los modelos para que SQLAlchemy los registre
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Plataforma Académica", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router)
+app.include_router(materias.router)
+app.include_router(inscripciones.router)
+app.include_router(entregas.router)
+app.include_router(avisos.router)
+
+
+@app.get("/")
+def health():
+    return {"status": "ok"}
