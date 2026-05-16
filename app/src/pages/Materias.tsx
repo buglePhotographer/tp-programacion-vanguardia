@@ -42,6 +42,7 @@ export default function Materias() {
     const [form, setForm] = useState(FORM_VACIO)
     const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
     const [saving, setSaving] = useState(false)
+    const [busqueda, setBusqueda] = useState("")
 
     async function cargar() {
         const res = await getMaterias()
@@ -222,14 +223,34 @@ export default function Materias() {
                     </div>
                 )}
 
-                {materias.length === 0 && (
-                    <div style={{ textAlign: "center", padding: "3rem", color: "#6b7a99", background: "white", borderRadius: 12 }}>
-                        No hay materias disponibles.
-                    </div>
-                )}
+                {/* Buscador */}
+                <div style={{ marginBottom: "1rem", position: "relative" }}>
+                    <span style={{ position: "absolute", left: ".8rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: ".9rem", pointerEvents: "none" }}>🔍</span>
+                    <input
+                        placeholder="Buscar por nombre, código o docente..."
+                        value={busqueda}
+                        onChange={e => setBusqueda(e.target.value)}
+                        style={{ width: "100%", boxSizing: "border-box", padding: ".55rem .8rem .55rem 2.2rem", fontSize: ".88rem", border: "1.5px solid #e2e8f0", borderRadius: 8, background: "white", outline: "none" }}
+                        onFocus={e => { e.target.style.borderColor = "#3b82f6"; e.target.style.boxShadow = "0 0 0 3px rgba(59,130,246,.12)" }}
+                        onBlur={e => { e.target.style.borderColor = "#e2e8f0"; e.target.style.boxShadow = "" }}
+                    />
+                </div>
 
+                {(() => {
+                    const filtrados = materias.filter(m =>
+                        m.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+                        m.codigo.toLowerCase().includes(busqueda.toLowerCase()) ||
+                        (m.docente?.nombre ?? "").toLowerCase().includes(busqueda.toLowerCase())
+                    )
+                    if (filtrados.length === 0) return (
+                        <div style={{ textAlign: "center", padding: "3rem", color: "#6b7a99", background: "white", borderRadius: 12 }}>
+                            {busqueda ? "No hay resultados para tu búsqueda." : "No hay materias disponibles."}
+                        </div>
+                    )
+                    return (
+                <>
                 <div style={{ display: "grid", gap: ".75rem" }}>
-                    {materias.map(materia => {
+                    {filtrados.map(materia => {
                         const insc = inscripcionDe(materia.id)
                         const esBorrando = confirmDelete === materia.id
                         return (
@@ -340,6 +361,14 @@ export default function Materias() {
                         )
                     })}
                 </div>
+                {busqueda && filtrados.length > 0 && (
+                    <p style={{ marginTop: ".75rem", fontSize: ".8rem", color: "#6b7a99" }}>
+                        {filtrados.length} resultado{filtrados.length !== 1 ? "s" : ""} para "{busqueda}"
+                    </p>
+                )}
+                </>
+                    )
+                })()}
             </div>
         </div>
     )

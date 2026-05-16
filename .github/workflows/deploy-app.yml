@@ -2,7 +2,7 @@ name: Deploy App
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "app/**"         # solo se dispara si cambia algo en el frontend
       - ".github/workflows/deploy-app.yml"

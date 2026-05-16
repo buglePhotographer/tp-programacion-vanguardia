@@ -2,7 +2,7 @@ name: Deploy API
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "api/**"         # solo se dispara si cambia algo en el backend
       - ".github/workflows/deploy-api.yml"
@@ -36,7 +36,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=         # tag con el SHA del commit
-            type=raw,value=latest    # tag "latest" siempre apunta a main
+            type=raw,value=latest    # tag "latest" siempre apunta a master
 
       - name: Build and push image
         uses: docker/build-push-action@v5
