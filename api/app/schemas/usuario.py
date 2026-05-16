@@ -18,6 +18,12 @@ class UsuarioResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class UsuarioUpdate(BaseModel):
+    nombre: str | None = None
+    email: EmailStr | None = None
+    password: str | None = None
+
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str

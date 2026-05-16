@@ -14,7 +14,7 @@ services:
       retries: 10
 
   backend:
-    build: ./backend
+    build: ./api
     ports:
       - "8000:8000"
     environment:
@@ -26,7 +26,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./app
       args:
         VITE_API_URL: http://localhost:8000
     ports:

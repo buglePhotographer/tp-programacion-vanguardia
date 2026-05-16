@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.usuario import Usuario, Rol
-from app.schemas.usuario import UsuarioCreate, UsuarioResponse, LoginRequest, TokenResponse
+from app.schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse, LoginRequest, TokenResponse
 from app.auth import hash_password, verify_password, create_token, get_current_user
 from app.dependencies import solo_admin
 
@@ -49,3 +49,42 @@ def listar_usuarios(
     if rol:
         q = q.filter(Usuario.rol == rol)
     return q.order_by(Usuario.nombre).all()
+
+
+@router.put("/usuarios/{usuario_id}", response_model=UsuarioResponse)
+def actualizar_usuario(
+    usuario_id: int,
+    data: UsuarioUpdate,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(solo_admin),
+):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if data.nombre is not None:
+        usuario.nombre = data.nombre
+    if data.email is not None:
+        existente = db.query(Usuario).filter(Usuario.email == data.email, Usuario.id != usuario_id).first()
+        if existente:
+            raise HTTPException(status_code=400, detail="Email ya registrado")
+        usuario.email = data.email
+    if data.password is not None:
+        usuario.password_hash = hash_password(data.password)
+    db.commit()
+    db.refresh(usuario)
+    return usuario
+
+
+@router.delete("/usuarios/{usuario_id}", status_code=204)
+def eliminar_usuario(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(solo_admin),
+):
+    if usuario_id == current_user.id:
+        raise HTTPException(status_code=400, detail="No podés eliminar tu propia cuenta")
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    db.delete(usuario)
+    db.commit()
