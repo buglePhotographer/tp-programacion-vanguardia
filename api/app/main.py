@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.views import auth, materias, inscripciones, entregas, avisos
+from app.config import FRONTEND_URL
 import app.models  # importa todos los modelos para que SQLAlchemy los registre
 
 
@@ -16,7 +17,7 @@ app = FastAPI(title="Plataforma Académica", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost"],
+    allow_origins=["http://localhost:5173", "http://localhost", FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
