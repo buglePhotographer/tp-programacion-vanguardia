@@ -26,8 +26,17 @@ function renderSidebar(rol: string, nombre = 'Usuario Test') {
 }
 
 describe('Sidebar — navegación por rol', () => {
-    test('admin ve Materias, Docentes y Alumnos', () => {
+    test('todos los roles ven Dashboard', () => {
+        for (const rol of ['admin', 'docente', 'estudiante']) {
+            const { unmount } = renderSidebar(rol)
+            expect(screen.getByText('Dashboard')).toBeInTheDocument()
+            unmount()
+        }
+    })
+
+    test('admin ve Dashboard, Materias, Docentes y Alumnos', () => {
         renderSidebar('admin')
+        expect(screen.getByText('Dashboard')).toBeInTheDocument()
         expect(screen.getByText('Materias')).toBeInTheDocument()
         expect(screen.getByText('Docentes')).toBeInTheDocument()
         expect(screen.getByText('Alumnos')).toBeInTheDocument()
@@ -39,8 +48,9 @@ describe('Sidebar — navegación por rol', () => {
         expect(screen.queryByText('Mis Entregas')).not.toBeInTheDocument()
     })
 
-    test('estudiante ve Materias, Mis Notas y Mis Entregas', () => {
+    test('estudiante ve Dashboard, Materias, Mis Notas y Mis Entregas', () => {
         renderSidebar('estudiante')
+        expect(screen.getByText('Dashboard')).toBeInTheDocument()
         expect(screen.getByText('Materias')).toBeInTheDocument()
         expect(screen.getByText('Mis Notas')).toBeInTheDocument()
         expect(screen.getByText('Mis Entregas')).toBeInTheDocument()
@@ -52,16 +62,32 @@ describe('Sidebar — navegación por rol', () => {
         expect(screen.queryByText('Alumnos')).not.toBeInTheDocument()
     })
 
-    test('docente solo ve Materias', () => {
+    test('docente ve Dashboard y Materias', () => {
         renderSidebar('docente')
+        expect(screen.getByText('Dashboard')).toBeInTheDocument()
         expect(screen.getByText('Materias')).toBeInTheDocument()
+    })
+
+    test('docente no ve Docentes, Alumnos ni Mis Notas', () => {
+        renderSidebar('docente')
         expect(screen.queryByText('Docentes')).not.toBeInTheDocument()
         expect(screen.queryByText('Mis Notas')).not.toBeInTheDocument()
+        expect(screen.queryByText('Alumnos')).not.toBeInTheDocument()
     })
 
     test('muestra el nombre del usuario', () => {
         renderSidebar('admin', 'María González')
         expect(screen.getByText('María González')).toBeInTheDocument()
+    })
+
+    test('muestra la inicial del nombre en el avatar', () => {
+        renderSidebar('admin', 'Carlos Pérez')
+        expect(screen.getByText('C')).toBeInTheDocument()
+    })
+
+    test('muestra el rol del usuario', () => {
+        renderSidebar('docente', 'Juan')
+        expect(screen.getByText('docente')).toBeInTheDocument()
     })
 
     test('logout llama a logout y navega a /login', () => {

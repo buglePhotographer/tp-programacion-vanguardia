@@ -62,3 +62,37 @@ def test_listar_usuarios_como_admin(client, admin_token):
 def test_listar_usuarios_sin_permiso(client, estudiante_token):
     res = client.get("/auth/usuarios", headers=auth(estudiante_token))
     assert res.status_code == 403
+
+
+def test_register_rol_invalido(client):
+    res = register(client, "Juan", "juan@test.com", "pass1234", "superusuario")
+    assert res.status_code == 422
+
+
+def test_acceso_con_token_invalido(client):
+    res = client.get("/auth/me", headers={"Authorization": "Bearer token.falso.aqui"})
+    assert res.status_code == 401
+
+
+def test_acceso_con_header_malformado(client):
+    res = client.get("/auth/me", headers={"Authorization": "formato-invalido"})
+    assert res.status_code == 401
+
+
+def test_register_campos_faltantes(client):
+    res = client.post("/auth/register", json={"email": "x@test.com"})
+    assert res.status_code == 422
+
+
+def test_listar_usuarios_como_docente(client, docente_token):
+    res = client.get("/auth/usuarios", headers=auth(docente_token))
+    assert res.status_code == 403
+
+
+def test_listar_usuarios_filtrado_por_rol(client, admin_token):
+    register(client, "Doc", "doc@test.com", "pass", "docente")
+    register(client, "Est", "est@test.com", "pass", "estudiante")
+    docentes = client.get("/auth/usuarios?rol=docente", headers=auth(admin_token)).json()
+    estudiantes = client.get("/auth/usuarios?rol=estudiante", headers=auth(admin_token)).json()
+    assert all(u["rol"] == "docente" for u in docentes)
+    assert all(u["rol"] == "estudiante" for u in estudiantes)

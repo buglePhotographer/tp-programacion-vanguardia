@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { getAvisosGlobales } from "../services/avisos.service"
 import api from "../services/api"
+import "./Dashboard.css"
 
 interface Aviso { id: number; titulo: string; contenido: string; autor: { nombre: string } }
 
@@ -132,65 +133,52 @@ export default function Dashboard() {
             </div>
 
             {/* Contenido */}
-            <div style={{ padding: "2rem" }}>
+            <div className="dash-content">
 
                 {/* Quick links */}
-                <h2 style={{ marginBottom: "1rem", fontSize: ".8rem", textTransform: "uppercase",
-                    letterSpacing: ".08em", color: "var(--text-muted)" }}>
-                    Acceso rápido
-                </h2>
-                <div style={{ display: "flex", gap: ".75rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
-                    {[
-                        { label: "Ir a Materias", to: "/materias", color: "#4ade80" },
-                        ...(user?.rol === "estudiante" ? [
-                            { label: "Mis Notas",    to: "/mis-notas",    color: "#3b82f6" },
-                            { label: "Mis Entregas", to: "/mis-entregas", color: "#f97316" },
-                        ] : []),
-                        ...(user?.rol === "admin" ? [
-                            { label: "Docentes", to: "/docentes", color: "#818cf8" },
-                            { label: "Alumnos",  to: "/alumnos",  color: "#f472b6" },
-                        ] : []),
-                    ].map(l => (
-                        <Link key={l.to} to={l.to} style={{
-                            padding: ".5rem 1.1rem",
-                            borderRadius: 999,
-                            background: l.color + "18",
-                            border: `1.5px solid ${l.color}40`,
-                            color: l.color,
-                            fontWeight: 600,
-                            fontSize: ".82rem",
-                            textDecoration: "none",
-                            transition: "background .15s",
-                        }}>
-                            {l.label} →
-                        </Link>
-                    ))}
+                <div className="dash-section">
+                    <div className="dash-section-title">Acceso rápido</div>
+                    <div className="dash-links">
+                        {[
+                            { label: "Materias",     to: "/materias",     icon: "📚", color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+                            ...(user?.rol === "estudiante" ? [
+                                { label: "Mis Notas",    to: "/mis-notas",    icon: "📊", color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe" },
+                                { label: "Mis Entregas", to: "/mis-entregas", icon: "📎", color: "#c2410c", bg: "#fff7ed", border: "#fed7aa" },
+                            ] : []),
+                            ...(user?.rol === "admin" ? [
+                                { label: "Docentes", to: "/docentes", icon: "👨‍🏫", color: "#4f46e5", bg: "#eef2ff", border: "#c7d2fe" },
+                                { label: "Alumnos",  to: "/alumnos",  icon: "🎓", color: "#be185d", bg: "#fdf2f8", border: "#fbcfe8" },
+                            ] : []),
+                        ].map(l => (
+                            <Link key={l.to} to={l.to} className="dash-link" style={{
+                                color: l.color, background: l.bg, borderColor: l.border,
+                            }}>
+                                <span>{l.icon}</span> {l.label} →
+                            </Link>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Avisos */}
-                <h2 style={{ marginBottom: "1rem" }}>📢 Avisos generales</h2>
-                {avisos.length === 0 ? (
-                    <div className="card" style={{ padding: "2.5rem", textAlign: "center", color: "var(--text-muted)" }}>
-                        No hay avisos publicados.
-                    </div>
-                ) : (
-                    <div style={{ display: "grid", gap: ".75rem" }}>
-                        {avisos.map(a => (
-                            <div key={a.id} className="card" style={{ padding: "1.1rem 1.35rem", display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-                                <div style={{ width: 36, height: 36, borderRadius: 10, background: "#fef9c3",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: "1.1rem", flexShrink: 0 }}>
-                                    📌
+                <div className="dash-section">
+                    <div className="dash-section-title">📢 Avisos generales</div>
+                    {avisos.length === 0 ? (
+                        <div className="dash-empty">No hay avisos publicados.</div>
+                    ) : (
+                        <div className="dash-avisos">
+                            {avisos.map(a => (
+                                <div key={a.id} className="aviso-card">
+                                    <div className="aviso-icon">📌</div>
+                                    <div className="aviso-body">
+                                        <div className="aviso-titulo">{a.titulo}</div>
+                                        <p className="aviso-contenido">{a.contenido}</p>
+                                        <span className="aviso-autor">Por {a.autor.nombre}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div style={{ fontWeight: 600, marginBottom: ".25rem" }}>{a.titulo}</div>
-                                    <p style={{ color: "var(--text-muted)", fontSize: ".87rem" }}>{a.contenido}</p>
-                                    <small style={{ color: "var(--text-muted)", fontSize: ".75rem" }}>Por {a.autor.nombre}</small>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </>
     )

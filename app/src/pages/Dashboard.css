@@ -1,0 +1,141 @@
+/* ── Área de contenido ─────────────────────────── */
+.dash-content {
+    padding: 2rem;
+}
+
+/* ── Sección ───────────────────────────────────── */
+.dash-section {
+    margin-bottom: 2.5rem;
+}
+
+.dash-section-title {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.dash-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* ── Quick links ───────────────────────────────── */
+.dash-links {
+    display: flex;
+    gap: .65rem;
+    flex-wrap: wrap;
+}
+
+.dash-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .6rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: .84rem;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    transition: transform .15s, box-shadow .15s, background .15s;
+}
+
+.dash-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,.1);
+}
+
+/* ── Avisos ────────────────────────────────────── */
+.dash-avisos {
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+
+.aviso-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    border-left: 4px solid #f59e0b;
+    box-shadow: var(--shadow-xs);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    transition: box-shadow .18s, transform .18s;
+}
+
+.aviso-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.aviso-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #fef3c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.aviso-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.aviso-titulo {
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--text);
+    margin-bottom: .35rem;
+    line-height: 1.3;
+}
+
+.aviso-contenido {
+    color: var(--text-muted);
+    font-size: .86rem;
+    line-height: 1.6;
+    margin-bottom: .6rem;
+}
+
+.aviso-autor {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.aviso-autor::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f59e0b;
+}
+
+/* ── Empty state ───────────────────────────────── */
+.dash-empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px dashed var(--border);
+    font-size: .9rem;
+}

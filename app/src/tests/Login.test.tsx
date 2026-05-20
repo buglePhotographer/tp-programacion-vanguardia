@@ -26,22 +26,27 @@ describe('Login', () => {
 
     test('renderiza el formulario con email, password y botón', () => {
         renderLogin()
-        expect(screen.getByPlaceholderText('Email')).toBeInTheDocument()
-        expect(screen.getByPlaceholderText('Contraseña')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument()
+        expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument()
+        expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeInTheDocument()
+    })
+
+    test('muestra el título de la plataforma', () => {
+        renderLogin()
+        expect(screen.getByText(/Plataforma Académica/i)).toBeInTheDocument()
     })
 
     test('navega al dashboard tras login exitoso', async () => {
         mockLogin.mockResolvedValueOnce(undefined)
         renderLogin()
 
-        fireEvent.change(screen.getByPlaceholderText('Email'), {
+        fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
             target: { value: 'admin@test.com' },
         })
-        fireEvent.change(screen.getByPlaceholderText('Contraseña'), {
+        fireEvent.change(screen.getByPlaceholderText('••••••••'), {
             target: { value: 'admin1234' },
         })
-        fireEvent.click(screen.getByRole('button', { name: /entrar/i }))
+        fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }))
 
         await waitFor(() => {
             expect(mockLogin).toHaveBeenCalledWith('admin@test.com', 'admin1234')
@@ -53,13 +58,13 @@ describe('Login', () => {
         mockLogin.mockRejectedValueOnce(new Error('Unauthorized'))
         renderLogin()
 
-        fireEvent.change(screen.getByPlaceholderText('Email'), {
+        fireEvent.change(screen.getByPlaceholderText('tu@email.com'), {
             target: { value: 'wrong@test.com' },
         })
-        fireEvent.change(screen.getByPlaceholderText('Contraseña'), {
+        fireEvent.change(screen.getByPlaceholderText('••••••••'), {
             target: { value: 'wrongpass' },
         })
-        fireEvent.click(screen.getByRole('button', { name: /entrar/i }))
+        fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }))
 
         await waitFor(() => {
             expect(screen.getByText(/email o contraseña incorrectos/i)).toBeInTheDocument()
@@ -70,12 +75,30 @@ describe('Login', () => {
         mockLogin.mockImplementation(() => new Promise(() => {}))
         renderLogin()
 
-        fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'a@b.com' } })
-        fireEvent.change(screen.getByPlaceholderText('Contraseña'), { target: { value: 'pass' } })
-        fireEvent.click(screen.getByRole('button', { name: /entrar/i }))
+        fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'a@b.com' } })
+        fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'pass' } })
+        fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }))
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: /ingresando/i })).toBeInTheDocument()
         })
+    })
+
+    test('botón queda deshabilitado mientras carga', async () => {
+        mockLogin.mockImplementation(() => new Promise(() => {}))
+        renderLogin()
+
+        fireEvent.change(screen.getByPlaceholderText('tu@email.com'), { target: { value: 'a@b.com' } })
+        fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'pass' } })
+        fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }))
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /ingresando/i })).toBeDisabled()
+        })
+    })
+
+    test('no muestra error en el render inicial', () => {
+        renderLogin()
+        expect(screen.queryByText(/email o contraseña incorrectos/i)).not.toBeInTheDocument()
     })
 })

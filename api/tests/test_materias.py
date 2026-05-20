@@ -83,3 +83,39 @@ def test_eliminar_materia_como_estudiante(client, estudiante_token, materia_id):
 def test_eliminar_materia_inexistente(client, admin_token):
     res = client.delete("/materias/9999", headers=auth(admin_token))
     assert res.status_code == 404
+
+
+def test_crear_materia_sin_token(client):
+    res = client.post("/materias/", json={"nombre": "X", "codigo": "X101"})
+    assert res.status_code == 401
+
+
+def test_crear_materia_como_docente(client, docente_token):
+    res = client.post("/materias/", json={"nombre": "X", "codigo": "X101"},
+                      headers=auth(docente_token))
+    assert res.status_code == 403
+
+
+def test_actualizar_materia_como_estudiante(client, estudiante_token, materia_id):
+    res = client.put(f"/materias/{materia_id}", json={"nombre": "Nuevo"},
+                     headers=auth(estudiante_token))
+    assert res.status_code == 403
+
+
+def test_eliminar_materia_como_docente(client, docente_token, materia_id):
+    res = client.delete(f"/materias/{materia_id}", headers=auth(docente_token))
+    assert res.status_code == 403
+
+
+def test_listar_materias_como_estudiante(client, estudiante_token):
+    res = client.get("/materias/", headers=auth(estudiante_token))
+    assert res.status_code == 200
+    assert isinstance(res.json(), list)
+
+
+def test_materia_actualizada_preserva_codigo(client, admin_token, materia_id):
+    res = client.put(f"/materias/{materia_id}", json={"nombre": "Nombre Nuevo"},
+                     headers=auth(admin_token))
+    assert res.status_code == 200
+    assert res.json()["codigo"] == "MAT101"
+    assert res.json()["nombre"] == "Nombre Nuevo"

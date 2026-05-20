@@ -84,3 +84,39 @@ def test_cargar_nota_final_inscripcion_inexistente(client, docente_token):
                      params={"nota": 5.0},
                      headers=auth(docente_token))
     assert res.status_code == 404
+
+
+def test_mis_materias_sin_token(client):
+    res = client.get("/inscripciones/mis-materias")
+    assert res.status_code == 401
+
+
+def test_alumnos_de_materia_inexistente_retorna_lista_vacia(client, docente_token):
+    res = client.get("/inscripciones/materia/9999", headers=auth(docente_token))
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_nota_final_en_limite_minimo(client, docente_token, estudiante_token, materia_id):
+    inscripcion_id = client.post("/inscripciones/", json={"materia_id": materia_id},
+                                 headers=auth(estudiante_token)).json()["id"]
+    res = client.put(f"/inscripciones/{inscripcion_id}/nota-final",
+                     params={"nota": 0.0}, headers=auth(docente_token))
+    assert res.status_code == 200
+
+
+def test_nota_final_en_limite_maximo(client, docente_token, estudiante_token, materia_id):
+    inscripcion_id = client.post("/inscripciones/", json={"materia_id": materia_id},
+                                 headers=auth(estudiante_token)).json()["id"]
+    res = client.put(f"/inscripciones/{inscripcion_id}/nota-final",
+                     params={"nota": 10.0}, headers=auth(docente_token))
+    assert res.status_code == 200
+
+
+def test_mis_materias_incluye_nota_final(client, docente_token, estudiante_token, materia_id):
+    insc_id = client.post("/inscripciones/", json={"materia_id": materia_id},
+                          headers=auth(estudiante_token)).json()["id"]
+    client.put(f"/inscripciones/{insc_id}/nota-final",
+               params={"nota": 7.5}, headers=auth(docente_token))
+    mis_materias = client.get("/inscripciones/mis-materias", headers=auth(estudiante_token)).json()
+    assert mis_materias[0]["nota_final"] == 7.5

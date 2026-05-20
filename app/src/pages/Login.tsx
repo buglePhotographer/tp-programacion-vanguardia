@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
+import "./Login.css"
 
 export default function Login() {
     const { login } = useAuth()
@@ -25,34 +26,48 @@ export default function Login() {
     }
 
     return (
-        <div style={{ maxWidth: 400, margin: "100px auto", padding: "2rem", border: "1px solid #ccc", borderRadius: 8 }}>
-            <h1 style={{ marginBottom: "1.5rem" }}>Iniciar sesión</h1>
-            {error && <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>}
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Email"
-                    required
-                    style={{ padding: "0.5rem", fontSize: "1rem" }}
-                />
-                <input
-                    type="password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Contraseña"
-                    required
-                    style={{ padding: "0.5rem", fontSize: "1rem" }}
-                />
-                <button
-                    type="submit"
-                    disabled={loading}
-                    style={{ padding: "0.75rem", background: "#1e3a5f", color: "white", border: "none", borderRadius: 4, cursor: "pointer", fontSize: "1rem" }}
-                >
-                    {loading ? "Ingresando..." : "Entrar"}
-                </button>
-            </form>
+        <div className="login-root">
+            <div className="login-card">
+                <div className="login-header">
+                    <span className="login-icon">🎓</span>
+                    <h1 className="login-title">Plataforma Académica</h1>
+                    <p className="login-subtitle">Ingresá tus credenciales para continuar</p>
+                </div>
+
+                {error && <div className="msg-error">{error}</div>}
+
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div className="login-field">
+                        <label htmlFor="email">Email</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            placeholder="tu@email.com"
+                            required
+                        />
+                    </div>
+                    <div className="login-field">
+                        <label htmlFor="password">Contraseña</label>
+                        <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="login-btn" disabled={loading}>
+                        {loading ? "Ingresando..." : "Iniciar sesión"}
+                    </button>
+                </form>
+
+                <div className="login-footer">
+                    Programación de Vanguardia · 2026
+                </div>
+            </div>
         </div>
     )
 }
