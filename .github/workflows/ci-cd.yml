@@ -24,6 +24,9 @@ jobs:
       - name: Correr tests
         run: pytest tests/ -v
         working-directory: api
+        env:
+          DATABASE_URL: sqlite:///./test_ci.db
+          SECRET_KEY: test-secret-key
 
   test-frontend:
     name: Tests frontend
