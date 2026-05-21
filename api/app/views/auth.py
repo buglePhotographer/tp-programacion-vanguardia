@@ -1,17 +1,19 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.usuario import Usuario, Rol
 from app.schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse, LoginRequest, TokenResponse
 from app.auth import hash_password, verify_password, create_token, get_current_user
 from app.dependencies import solo_admin
+from app.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=UsuarioResponse, status_code=201)
-def register(data: UsuarioCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, data: UsuarioCreate, db: Session = Depends(get_db)):
     if db.query(Usuario).filter(Usuario.email == data.email).first():
         raise HTTPException(status_code=400, detail="Email ya registrado")
     user = Usuario(
@@ -27,7 +29,8 @@ def register(data: UsuarioCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.email == data.email).first()
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
