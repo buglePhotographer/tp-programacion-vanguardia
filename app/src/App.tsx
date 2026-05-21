@@ -11,11 +11,13 @@ import AdminPanel from "./pages/AdminPanel"
 import Docentes from "./pages/Docentes"
 import Alumnos from "./pages/Alumnos"
 import Calendario from "./pages/Calendario"
+import Register from "./pages/Register"
 
 export default function App() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
             <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>

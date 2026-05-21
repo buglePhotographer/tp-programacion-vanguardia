@@ -1,20 +1,21 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link, useLocation } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import "./Login.css"
 
 export default function Login() {
     const { login } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
+    const justRegistered = (location.state as any)?.registered === true
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         setLoading(true)
-        setError("")
         try {
             await login(email, password)
             navigate("/dashboard")
@@ -34,6 +35,9 @@ export default function Login() {
                     <p className="login-subtitle">Ingresá tus credenciales para continuar</p>
                 </div>
 
+                {justRegistered && (
+                    <div className="msg-ok">✓ Cuenta creada. Podés iniciar sesión.</div>
+                )}
                 {error && <div className="msg-error">{error}</div>}
 
                 <form onSubmit={handleSubmit} className="login-form">
@@ -43,7 +47,7 @@ export default function Login() {
                             id="email"
                             type="email"
                             value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            onChange={e => { setEmail(e.target.value); setError("") }}
                             placeholder="tu@email.com"
                             required
                         />
@@ -54,7 +58,7 @@ export default function Login() {
                             id="password"
                             type="password"
                             value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            onChange={e => { setPassword(e.target.value); setError("") }}
                             placeholder="••••••••"
                             required
                         />
@@ -65,7 +69,10 @@ export default function Login() {
                 </form>
 
                 <div className="login-footer">
-                    Programación de Vanguardia · 2026
+                    ¿No tenés cuenta?{" "}
+                    <Link to="/register" style={{ color: "#16a34a", fontWeight: 700, textDecoration: "none" }}>
+                        Registrate
+                    </Link>
                 </div>
             </div>
         </div>
