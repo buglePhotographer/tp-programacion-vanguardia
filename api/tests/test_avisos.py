@@ -36,7 +36,7 @@ def test_crear_aviso_como_estudiante(client, estudiante_token):
         "titulo": "Aviso",
         "contenido": "Contenido"
     }, headers=auth(estudiante_token))
-    assert res.status_code == 201
+    assert res.status_code == 403
 
 
 def test_listar_avisos_globales(client, admin_token):
