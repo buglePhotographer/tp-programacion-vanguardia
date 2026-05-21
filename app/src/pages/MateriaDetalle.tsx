@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { getMateria } from "../services/materias.service"
 import { getTPs, crearTP, entregar, getEntregasPorTP, calificarEntrega } from "../services/entregas.service"
-import { getAvisosPorMateria, crearAviso } from "../services/avisos.service"
+import { getAvisosPorMateria, crearAviso, eliminarAviso } from "../services/avisos.service"
 
 export default function MateriaDetalle() {
     const { id } = useParams()
@@ -28,6 +28,12 @@ export default function MateriaDetalle() {
         const r = await getAvisosPorMateria(Number(id))
         setAvisos(r.data)
         setNuevoAviso({ titulo: "", contenido: "" })
+    }
+
+    async function handleEliminarAviso(aviso_id: number) {
+        await eliminarAviso(aviso_id).catch(() => {})
+        const r = await getAvisosPorMateria(Number(id))
+        setAvisos(r.data)
     }
 
     async function handleCrearTP(e: React.BaseSyntheticEvent) {
@@ -121,14 +127,28 @@ export default function MateriaDetalle() {
 
                     <div style={{ display: "grid", gap: ".75rem" }}>
                         {avisos.map(a => (
-                            <div key={a.id} style={cardBase}>
-                                <strong style={{ fontSize: ".95rem", color: "#1a2035" }}>{a.titulo}</strong>
-                                <p style={{ margin: ".4rem 0 .6rem", color: "#374151", lineHeight: 1.6, fontSize: ".88rem" }}>
-                                    {a.contenido}
-                                </p>
-                                <small style={{ color: "#6b7a99", fontSize: ".78rem" }}>
-                                    Publicado por {a.autor.nombre}
-                                </small>
+                            <div key={a.id} style={{ ...cardBase, display: "flex", alignItems: "flex-start", gap: "1rem" }}>
+                                <div style={{ flex: 1 }}>
+                                    <strong style={{ fontSize: ".95rem", color: "#1a2035" }}>{a.titulo}</strong>
+                                    <p style={{ margin: ".4rem 0 .6rem", color: "#374151", lineHeight: 1.6, fontSize: ".88rem" }}>
+                                        {a.contenido}
+                                    </p>
+                                    <small style={{ color: "#6b7a99", fontSize: ".78rem" }}>
+                                        Publicado por {a.autor.nombre}
+                                    </small>
+                                </div>
+                                {(user?.rol === "docente" || user?.rol === "admin") && (
+                                    <button
+                                        onClick={() => handleEliminarAviso(a.id)}
+                                        title="Eliminar aviso"
+                                        style={{
+                                            background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.2)",
+                                            color: "#ef4444", borderRadius: 7, cursor: "pointer",
+                                            width: 28, height: 28, fontSize: ".8rem", flexShrink: 0,
+                                            display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+                                        }}
+                                    >✕</button>
+                                )}
                             </div>
                         ))}
                     </div>

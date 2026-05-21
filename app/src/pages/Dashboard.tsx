@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { getAvisosGlobales } from "../services/avisos.service"
+import { getAvisosGlobales, crearAviso, eliminarAviso } from "../services/avisos.service"
 import api from "../services/api"
 import "./Dashboard.css"
 
@@ -16,21 +16,41 @@ export default function Dashboard() {
     const { user } = useAuth()
     const [avisos, setAvisos] = useState<Aviso[]>([])
     const [stats, setStats] = useState<StatCard[]>([])
+    const [nuevoAviso, setNuevoAviso] = useState({ titulo: "", contenido: "" })
+    const [showAvisoForm, setShowAvisoForm] = useState(false)
+
+    const loadAvisos = () => getAvisosGlobales().then(r => {
+        setAvisos(r.data)
+        if (user?.rol === "admin")
+            setStats(prev => prev.map(s => s.label === "Avisos" ? { ...s, value: r.data.length } : s))
+    }).catch(() => {})
+
+    async function handleCrearAviso(e: React.FormEvent) {
+        e.preventDefault()
+        await crearAviso(nuevoAviso).catch(() => {})
+        setNuevoAviso({ titulo: "", contenido: "" })
+        setShowAvisoForm(false)
+        loadAvisos()
+    }
 
     useEffect(() => {
-        getAvisosGlobales().then(r => setAvisos(r.data)).catch(() => {})
+        loadAvisos()
 
         if (user?.rol === "admin") {
             Promise.all([
                 api.get("/materias/"),
                 api.get("/auth/usuarios?rol=docente"),
                 api.get("/auth/usuarios?rol=estudiante"),
-            ]).then(([m, d, e]) => setStats([
-                { label: "Materias",   value: m.data.length, icon: "📚", bg: "linear-gradient(135deg,#4ade80,#16a34a)", shadow: "rgba(74,222,128,.35)",  sub: "activas" },
-                { label: "Docentes",   value: d.data.length, icon: "👨‍🏫", bg: "linear-gradient(135deg,#818cf8,#4f46e5)", shadow: "rgba(129,140,248,.35)", sub: "registrados" },
-                { label: "Alumnos",    value: e.data.length, icon: "🎓", bg: "linear-gradient(135deg,#f97316,#ea580c)", shadow: "rgba(249,115,22,.35)",  sub: "inscriptos" },
-                { label: "Avisos",     value: avisos.length, icon: "📢", bg: "linear-gradient(135deg,#f472b6,#db2777)", shadow: "rgba(244,114,182,.35)", sub: "publicados" },
-            ])).catch(() => {})
+                getAvisosGlobales(),
+            ]).then(([m, d, e, av]) => {
+                setAvisos(av.data)
+                setStats([
+                    { label: "Materias",   value: m.data.length,  icon: "📚", bg: "linear-gradient(135deg,#4ade80,#16a34a)", shadow: "rgba(74,222,128,.35)",  sub: "activas" },
+                    { label: "Docentes",   value: d.data.length,  icon: "👨‍🏫", bg: "linear-gradient(135deg,#818cf8,#4f46e5)", shadow: "rgba(129,140,248,.35)", sub: "registrados" },
+                    { label: "Alumnos",    value: e.data.length,  icon: "🎓", bg: "linear-gradient(135deg,#f97316,#ea580c)", shadow: "rgba(249,115,22,.35)",  sub: "inscriptos" },
+                    { label: "Avisos",     value: av.data.length, icon: "📢", bg: "linear-gradient(135deg,#f472b6,#db2777)", shadow: "rgba(244,114,182,.35)", sub: "publicados" },
+                ])
+            }).catch(() => {})
         }
 
         if (user?.rol === "estudiante") {
@@ -56,14 +76,7 @@ export default function Dashboard() {
         }
     }, [user])
 
-    // re-run stats when avisos load (for admin aviso count)
-    useEffect(() => {
-        if (user?.rol === "admin" && stats.length === 4) {
-            setStats(prev => prev.map(s => s.label === "Avisos" ? { ...s, value: avisos.length } : s))
-        }
-    }, [avisos])
-
-    const hora = new Date().getHours()
+const hora = new Date().getHours()
     const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches"
 
     return (
@@ -161,7 +174,53 @@ export default function Dashboard() {
 
                 {/* Avisos */}
                 <div className="dash-section">
-                    <div className="dash-section-title">📢 Avisos generales</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                        <div className="dash-section-title" style={{ margin: 0 }}>📢 Avisos generales</div>
+                        {(user?.rol === "docente" || user?.rol === "admin") && (
+                            <button onClick={() => setShowAvisoForm(v => !v)} style={{
+                                background: showAvisoForm ? "#f1f5f9" : "linear-gradient(135deg,#6366f1,#4f46e5)",
+                                color: showAvisoForm ? "#475569" : "white",
+                                border: "none", borderRadius: 8,
+                                padding: ".4rem .9rem", fontSize: ".78rem", fontWeight: 600,
+                                cursor: "pointer",
+                            }}>
+                                {showAvisoForm ? "✕ Cancelar" : "+ Nuevo aviso"}
+                            </button>
+                        )}
+                    </div>
+
+                    {showAvisoForm && (
+                        <form onSubmit={handleCrearAviso} style={{
+                            background: "white", border: "1.5px solid #c7d2fe",
+                            borderRadius: 10, padding: "1.1rem 1.25rem",
+                            marginBottom: "1rem", display: "flex", flexDirection: "column", gap: ".6rem",
+                        }}>
+                            <input
+                                placeholder="Título"
+                                value={nuevoAviso.titulo}
+                                onChange={e => setNuevoAviso(p => ({ ...p, titulo: e.target.value }))}
+                                required
+                                style={formInputStyle}
+                            />
+                            <textarea
+                                placeholder="Contenido"
+                                rows={3}
+                                value={nuevoAviso.contenido}
+                                onChange={e => setNuevoAviso(p => ({ ...p, contenido: e.target.value }))}
+                                required
+                                style={{ ...formInputStyle, resize: "vertical" }}
+                            />
+                            <button type="submit" style={{
+                                alignSelf: "flex-start",
+                                background: "linear-gradient(135deg,#6366f1,#4f46e5)",
+                                color: "white", border: "none", borderRadius: 8,
+                                padding: ".45rem 1.1rem", fontSize: ".82rem", fontWeight: 600, cursor: "pointer",
+                            }}>
+                                Publicar aviso
+                            </button>
+                        </form>
+                    )}
+
                     {avisos.length === 0 ? (
                         <div className="dash-empty">No hay avisos publicados.</div>
                     ) : (
@@ -174,6 +233,18 @@ export default function Dashboard() {
                                         <p className="aviso-contenido">{a.contenido}</p>
                                         <span className="aviso-autor">Por {a.autor.nombre}</span>
                                     </div>
+                                    {(user?.rol === "docente" || user?.rol === "admin") && (
+                                        <button
+                                            onClick={async () => { await eliminarAviso(a.id).catch(() => {}); loadAvisos() }}
+                                            title="Eliminar aviso"
+                                            style={{
+                                                background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.2)",
+                                                color: "#ef4444", borderRadius: 7, cursor: "pointer",
+                                                width: 28, height: 28, fontSize: ".8rem", flexShrink: 0,
+                                                display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+                                            }}
+                                        >✕</button>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -182,4 +253,12 @@ export default function Dashboard() {
             </div>
         </>
     )
+}
+
+const formInputStyle: React.CSSProperties = {
+    width: "100%", padding: ".55rem .8rem",
+    fontSize: ".88rem", border: "1.5px solid #e2e8f0",
+    borderRadius: 8, background: "#f8fafc",
+    outline: "none", fontFamily: "inherit",
+    boxSizing: "border-box",
 }

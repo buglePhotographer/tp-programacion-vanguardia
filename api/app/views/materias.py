@@ -5,13 +5,15 @@ from app.models.materia import Materia
 from app.schemas.materia import MateriaCreate, MateriaUpdate, MateriaResponse
 from app.auth import get_current_user
 from app.dependencies import solo_admin
-from app.models.usuario import Usuario
+from app.models.usuario import Usuario, Rol
 
 router = APIRouter(prefix="/materias", tags=["Materias"])
 
 
 @router.get("/", response_model=list[MateriaResponse])
-def listar(db: Session = Depends(get_db), _: Usuario = Depends(get_current_user)):
+def listar(db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
+    if current_user.rol == Rol.docente:
+        return db.query(Materia).filter(Materia.docente_id == current_user.id).all()
     return db.query(Materia).all()
 
 

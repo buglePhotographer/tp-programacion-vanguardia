@@ -2,9 +2,9 @@ import api from "./api"
 
 export const getMaterias = () => api.get("/materias/")
 export const getMateria = (id: number) => api.get(`/materias/${id}`)
-export const createMateria = (data: { nombre: string; codigo: string; descripcion?: string }) =>
+export const createMateria = (data: { nombre: string; codigo: string; descripcion?: string; docente_id?: number }) =>
     api.post("/materias/", data)
-export const updateMateria = (id: number, data: { nombre?: string; codigo?: string; descripcion?: string }) =>
+export const updateMateria = (id: number, data: { nombre?: string; codigo?: string; descripcion?: string; docente_id?: number }) =>
     api.put(`/materias/${id}`, data)
 export const deleteMateria = (id: number) => api.delete(`/materias/${id}`)
 

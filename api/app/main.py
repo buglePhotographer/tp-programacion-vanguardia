@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.views import auth, materias, inscripciones, entregas, avisos
+from app.views import auth, materias, inscripciones, entregas, avisos, eventos
 from app.config import FRONTEND_URL
 import app.models  # importa todos los modelos para que SQLAlchemy los registre
 
@@ -28,6 +28,7 @@ app.include_router(materias.router)
 app.include_router(inscripciones.router)
 app.include_router(entregas.router)
 app.include_router(avisos.router)
+app.include_router(eventos.router)
 
 
 @app.get("/")

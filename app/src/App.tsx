@@ -10,6 +10,7 @@ import MisEntregas from "./pages/MisEntregas"
 import AdminPanel from "./pages/AdminPanel"
 import Docentes from "./pages/Docentes"
 import Alumnos from "./pages/Alumnos"
+import Calendario from "./pages/Calendario"
 
 export default function App() {
     return (
@@ -21,6 +22,7 @@ export default function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/materias" element={<Materias />} />
                     <Route path="/materias/:id" element={<MateriaDetalle />} />
+                    <Route path="/calendario" element={<Calendario />} />
                 </Route>
             </Route>
 

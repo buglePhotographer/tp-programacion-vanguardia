@@ -2,13 +2,14 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { getMaterias, getMisMaterias, inscribirse, createMateria, updateMateria, deleteMateria } from "../services/materias.service"
+import api from "../services/api"
 
 interface Materia {
     id: number
     nombre: string
     codigo: string
     descripcion?: string
-    docente?: { nombre: string }
+    docente?: { id: number; nombre: string }
 }
 
 interface Inscripcion {
@@ -24,7 +25,9 @@ const estadoStyle: Record<string, React.CSSProperties> = {
     desaprobada: { background: "#fee2e2", color: "#b91c1c" },
 }
 
-const FORM_VACIO = { nombre: "", codigo: "", descripcion: "" }
+interface Docente { id: number; nombre: string }
+
+const FORM_VACIO = { nombre: "", codigo: "", descripcion: "", docente_id: "" }
 
 export default function Materias() {
     const { user } = useAuth()
@@ -32,6 +35,7 @@ export default function Materias() {
     const esEstudiante = user?.rol === "estudiante"
 
     const [materias, setMaterias] = useState<Materia[]>([])
+    const [docentes, setDocentes] = useState<Docente[]>([])
     const [inscripciones, setInscripciones] = useState<Inscripcion[]>([])
     const [mensaje, setMensaje] = useState<{ texto: string; tipo: "ok" | "error" } | null>(null)
     const [loadingId, setLoadingId] = useState<number | null>(null)
@@ -53,7 +57,10 @@ export default function Materias() {
         }
     }
 
-    useEffect(() => { cargar() }, [user])
+    useEffect(() => {
+        cargar()
+        if (esAdmin) api.get("/auth/usuarios?rol=docente").then(r => setDocentes(r.data)).catch(() => {})
+    }, [user])
 
     function inscripcionDe(materiaId: number) {
         return inscripciones.find(i => i.materia_id === materiaId)
@@ -74,7 +81,7 @@ export default function Materias() {
 
     function iniciarEdicion(m: Materia) {
         setEditando(m)
-        setForm({ nombre: m.nombre, codigo: m.codigo, descripcion: m.descripcion ?? "" })
+        setForm({ nombre: m.nombre, codigo: m.codigo, descripcion: m.descripcion ?? "", docente_id: m.docente ? String(m.docente.id) : "" })
         setMostrarForm(true)
         setConfirmDelete(null)
         setMensaje(null)
@@ -90,12 +97,13 @@ export default function Materias() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         setSaving(true); setMensaje(null)
+        const payload = { ...form, docente_id: form.docente_id ? Number(form.docente_id) : undefined }
         try {
             if (editando) {
-                await updateMateria(editando.id, form)
+                await updateMateria(editando.id, payload)
                 setMensaje({ texto: `Materia "${form.nombre}" actualizada`, tipo: "ok" })
             } else {
-                await createMateria(form)
+                await createMateria(payload)
                 setMensaje({ texto: `Materia "${form.nombre}" creada`, tipo: "ok" })
             }
             cancelarForm()
@@ -202,6 +210,23 @@ export default function Materias() {
                                     />
                                 </div>
                             ))}
+                            <div style={{ flex: 2, minWidth: 160 }}>
+                                <select
+                                    value={form.docente_id}
+                                    onChange={e => setForm(p => ({ ...p, docente_id: e.target.value }))}
+                                    style={{
+                                        width: "100%", boxSizing: "border-box",
+                                        padding: ".55rem .8rem", fontSize: ".88rem",
+                                        border: "1.5px solid #e2e8f0", borderRadius: 8,
+                                        background: "#f8fafc", outline: "none", color: form.docente_id ? "#1a2035" : "#94a3b8",
+                                    }}
+                                >
+                                    <option value="">Sin docente asignado</option>
+                                    {docentes.map(d => (
+                                        <option key={d.id} value={d.id}>{d.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div style={{ display: "flex", gap: ".5rem" }}>
                                 <button type="submit" disabled={saving} style={{
                                     padding: ".55rem 1.1rem", borderRadius: 8, border: "none",

@@ -5,18 +5,21 @@ interface NavItem { label: string; to: string; icon: string }
 
 const itemsPorRol: Record<string, NavItem[]> = {
     admin: [
-        { label: "Dashboard", to: "/dashboard", icon: "🏠" },
-        { label: "Materias",  to: "/materias",  icon: "📚" },
-        { label: "Docentes",  to: "/docentes",  icon: "👨‍🏫" },
-        { label: "Alumnos",   to: "/alumnos",   icon: "🎓" },
+        { label: "Dashboard",  to: "/dashboard",  icon: "🏠" },
+        { label: "Materias",   to: "/materias",   icon: "📚" },
+        { label: "Calendario", to: "/calendario", icon: "📅" },
+        { label: "Docentes",   to: "/docentes",   icon: "👨‍🏫" },
+        { label: "Alumnos",    to: "/alumnos",    icon: "🎓" },
     ],
     docente: [
-        { label: "Dashboard", to: "/dashboard", icon: "🏠" },
-        { label: "Materias",  to: "/materias",  icon: "📚" },
+        { label: "Dashboard",  to: "/dashboard",  icon: "🏠" },
+        { label: "Materias",   to: "/materias",   icon: "📚" },
+        { label: "Calendario", to: "/calendario", icon: "📅" },
     ],
     estudiante: [
         { label: "Dashboard",    to: "/dashboard",    icon: "🏠" },
         { label: "Materias",     to: "/materias",     icon: "📚" },
+        { label: "Calendario",   to: "/calendario",   icon: "📅" },
         { label: "Mis Notas",    to: "/mis-notas",    icon: "📊" },
         { label: "Mis Entregas", to: "/mis-entregas", icon: "📤" },
     ],
