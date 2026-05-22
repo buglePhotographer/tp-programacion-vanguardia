@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -9,6 +10,7 @@ from app.dependencies import solo_docente
 from app.models.usuario import Usuario, Rol
 
 router = APIRouter(prefix="/inscripciones", tags=["Inscripciones"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/", response_model=InscripcionResponse, status_code=201)
@@ -24,6 +26,7 @@ def inscribirse(data: InscripcionCreate, db: Session = Depends(get_db), current_
     db.add(inscripcion)
     db.commit()
     db.refresh(inscripcion)
+    logger.info("Inscripción usuario_id=%d materia_id=%d", current_user.id, data.materia_id)
     return inscripcion
 
 

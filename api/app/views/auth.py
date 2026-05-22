@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
@@ -9,6 +10,7 @@ from app.dependencies import solo_admin
 from app.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register", response_model=UsuarioResponse, status_code=201)
@@ -25,6 +27,7 @@ def register(request: Request, data: UsuarioCreate, db: Session = Depends(get_db
     db.add(user)
     db.commit()
     db.refresh(user)
+    logger.info("Registro exitoso email=%s rol=%s", user.email, user.rol)
     return user
 
 
@@ -33,7 +36,9 @@ def register(request: Request, data: UsuarioCreate, db: Session = Depends(get_db
 def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.email == data.email).first()
     if not user or not verify_password(data.password, user.password_hash):
+        logger.warning("Login fallido email=%s", data.email)
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    logger.info("Login exitoso email=%s rol=%s", user.email, user.rol)
     return {"access_token": create_token(user.id, user.rol)}
 
 

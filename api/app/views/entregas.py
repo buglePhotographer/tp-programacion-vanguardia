@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -8,6 +9,7 @@ from app.dependencies import solo_docente
 from app.models.usuario import Usuario, Rol
 
 router = APIRouter(tags=["Entregas"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/trabajos-practicos", response_model=TPResponse, status_code=201)
@@ -35,6 +37,7 @@ def entregar_tp(data: EntregaCreate, db: Session = Depends(get_db), current_user
     db.add(entrega)
     db.commit()
     db.refresh(entrega)
+    logger.info("Entrega registrada tp_id=%d estudiante_id=%d", data.tp_id, current_user.id)
     return entrega
 
 
@@ -56,4 +59,5 @@ def calificar(entrega_id: int, data: EntregaCalificar, db: Session = Depends(get
     entrega.nota = data.nota
     entrega.comentario = data.comentario
     db.commit()
+    logger.info("Calificación registrada entrega_id=%d nota=%.1f", entrega_id, data.nota)
     return {"ok": True}
