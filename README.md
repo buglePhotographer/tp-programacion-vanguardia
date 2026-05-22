@@ -2,15 +2,16 @@
 
 **Materia:** Programación de Vanguardia  
 **Docente:** Esteban Calcagno  
-**Tipo:** Trabajo Práctico Final Grupal
+**Tipo:** Trabajo práctico final grupal
+**Integrantes**: Leonardo Mansilla · Nahuel Pastene · Edgardo Centurión · Gustavo Citati · Miguel Luna · Walter Gómez
 
 Aplicación web full-stack que digitaliza la administración de materias, inscripciones, entregas y comunicación en un entorno universitario. El sistema soporta tres roles con permisos diferenciados:
 
-| Rol | Capacidades |
-| --- | --- |
-| **estudiante** | Ver materias, inscribirse, entregar TPs, consultar notas |
-| **docente** | Gestionar materias asignadas, calificar entregas, publicar avisos y eventos |
-| **admin** | Administración completa: usuarios, materias, docentes, alumnos |
+| Rol            | Capacidades                                                                 |
+| -------------- | --------------------------------------------------------------------------- |
+| **estudiante** | Ver materias, inscribirse, entregar TPs, consultar notas                    |
+| **docente**    | Gestionar materias asignadas, calificar entregas, publicar avisos y eventos |
+| **admin**      | Administración completa: usuarios, materias, docentes, alumnos              |
 
 ---
 
@@ -28,11 +29,11 @@ Aplicación web full-stack que digitaliza la administración de materias, inscri
                                                   └──────────────────────┘
 ```
 
-| Capa | Tecnología |
-| --- | --- |
-| Backend | FastAPI · SQLAlchemy 2.0 · PostgreSQL · PyJWT · bcrypt · slowapi |
-| Frontend | React 19 · TypeScript · Vite · React Router DOM · Axios |
-| Infraestructura | Docker · Docker Compose · GitHub Actions · Render |
+| Capa            | Tecnología                                                       |
+| --------------- | ---------------------------------------------------------------- |
+| Backend         | FastAPI · SQLAlchemy 2.0 · PostgreSQL · PyJWT · bcrypt · slowapi |
+| Frontend        | React 19 · TypeScript · Vite · React Router DOM · Axios          |
+| Infraestructura | Docker · Docker Compose · GitHub Actions · Render                |
 
 ### Estructura del repositorio
 
@@ -70,9 +71,9 @@ Requisitos: [Docker Desktop](https://www.docker.com/products/docker-desktop/) in
 docker compose up --build
 ```
 
-| Servicio | URL |
-| --- | --- |
-| Frontend | http://localhost |
+| Servicio             | URL                        |
+| -------------------- | -------------------------- |
+| Frontend             | http://localhost           |
 | Backend / Swagger UI | http://localhost:8000/docs |
 
 Para poblar la base con datos de prueba:
@@ -83,25 +84,25 @@ docker compose exec backend python seed.py
 
 ### Usuarios de prueba (tras ejecutar seed.py)
 
-| Email | Contraseña | Rol |
-| --- | --- | --- |
-| admin@plataforma.com | admin123 | Administrador |
-| carlos.gomez@plataforma.com | docente123 | Docente |
-| maria.lopez@plataforma.com | alumno123 | Estudiante |
+| Email                       | Contraseña | Rol           |
+| --------------------------- | ---------- | ------------- |
+| admin@plataforma.com        | admin123   | Administrador |
+| carlos.gomez@plataforma.com | docente123 | Docente       |
+| maria.lopez@plataforma.com  | alumno123  | Estudiante    |
 
 ### Variables de entorno
 
 **`api/.env`**
 
-| Variable | Descripción | Ejemplo |
-| --- | --- | --- |
+| Variable       | Descripción                   | Ejemplo                                    |
+| -------------- | ----------------------------- | ------------------------------------------ |
 | `DATABASE_URL` | Cadena de conexión PostgreSQL | `postgresql://user:pass@localhost:5432/db` |
-| `SECRET_KEY` | Clave para firmar los JWT | String largo y aleatorio |
+| `SECRET_KEY`   | Clave para firmar los JWT     | String largo y aleatorio                   |
 
 **`app/.env`**
 
-| Variable | Descripción | Ejemplo |
-| --- | --- | --- |
+| Variable       | Descripción          | Ejemplo                 |
+| -------------- | -------------------- | ----------------------- |
 | `VITE_API_URL` | URL base del backend | `http://localhost:8000` |
 
 ---
@@ -134,17 +135,17 @@ Las rutas protegidas usan `ProtectedRoute`, que redirige a `/login` si no hay se
 
 ### Páginas
 
-| Página | Descripción |
-| --- | --- |
-| `Login` / `Register` | Autenticación y registro de cuentas estudiante |
-| `Dashboard` | Resumen estadístico + avisos globales recientes |
-| `Materias` | ABM completo para admin, vista filtrada para docentes |
-| `MateriaDetalle` | Ficha de materia: inscripción, TPs, entregas, avisos |
-| `Calendario` | Eventos agrupados en Próximos / Pasados, con formulario de creación |
-| `MisNotas` | Notas del estudiante por materia con promedio |
-| `MisEntregas` | Historial de entregas con estado de calificación |
-| `AdminPanel` | Estadísticas globales del sistema |
-| `Docentes` / `Alumnos` | ABM de usuarios por rol |
+| Página                 | Descripción                                                         |
+| ---------------------- | ------------------------------------------------------------------- |
+| `Login` / `Register`   | Autenticación y registro de cuentas estudiante                      |
+| `Dashboard`            | Resumen estadístico + avisos globales recientes                     |
+| `Materias`             | ABM completo para admin, vista filtrada para docentes               |
+| `MateriaDetalle`       | Ficha de materia: inscripción, TPs, entregas, avisos                |
+| `Calendario`           | Eventos agrupados en Próximos / Pasados, con formulario de creación |
+| `MisNotas`             | Notas del estudiante por materia con promedio                       |
+| `MisEntregas`          | Historial de entregas con estado de calificación                    |
+| `AdminPanel`           | Estadísticas globales del sistema                                   |
+| `Docentes` / `Alumnos` | ABM de usuarios por rol                                             |
 
 ---
 
@@ -173,14 +174,14 @@ Usuario (id, nombre, email, password_hash, rol)
 
 ### Routers
 
-| Router | Prefijo | Descripción |
-| --- | --- | --- |
-| `auth` | `/auth` | Login, registro |
-| `materias` | `/materias` | ABM de materias |
-| `inscripciones` | `/inscripciones` | Inscribirse / desinscribirse |
-| `entregas` | `/entregas` | Subir y calificar TPs |
-| `avisos` | `/avisos` | Avisos globales y por materia |
-| `eventos` | `/eventos` | Calendario de eventos |
+| Router          | Prefijo          | Descripción                   |
+| --------------- | ---------------- | ----------------------------- |
+| `auth`          | `/auth`          | Login, registro               |
+| `materias`      | `/materias`      | ABM de materias               |
+| `inscripciones` | `/inscripciones` | Inscribirse / desinscribirse  |
+| `entregas`      | `/entregas`      | Subir y calificar TPs         |
+| `avisos`        | `/avisos`        | Avisos globales y por materia |
+| `eventos`       | `/eventos`       | Calendario de eventos         |
 
 ### Autorización
 
@@ -206,14 +207,14 @@ pytest tests/ -v
 
 Los tests usan SQLite en memoria; no requieren PostgreSQL. La variable `TESTING=true` se setea en `conftest.py` antes de importar la app para deshabilitar el rate limiter.
 
-| Archivo | Cobertura |
-| --- | --- |
-| `test_auth.py` | Registro, login, tokens inválidos |
-| `test_materias.py` | ABM de materias, permisos por rol |
-| `test_inscripciones.py` | Inscripción y desinscripción |
-| `test_entregas.py` | Entrega de TPs, calificación, permisos |
-| `test_avisos.py` | Creación/eliminación de avisos, permisos |
-| `test_integracion.py` | Flujos completos end-to-end |
+| Archivo                 | Cobertura                                |
+| ----------------------- | ---------------------------------------- |
+| `test_auth.py`          | Registro, login, tokens inválidos        |
+| `test_materias.py`      | ABM de materias, permisos por rol        |
+| `test_inscripciones.py` | Inscripción y desinscripción             |
+| `test_entregas.py`      | Entrega de TPs, calificación, permisos   |
+| `test_avisos.py`        | Creación/eliminación de avisos, permisos |
+| `test_integracion.py`   | Flujos completos end-to-end              |
 
 ### Frontend
 
@@ -222,15 +223,15 @@ cd app
 npm test
 ```
 
-| Archivo | Cobertura |
-| --- | --- |
-| `Login.test.tsx` | Render, submit, error de credenciales |
-| `ProtectedRoute.test.tsx` | Redirección sin sesión, render con sesión |
-| `Sidebar.test.tsx` | Ítems del menú según rol |
-| `Dashboard.test.tsx` | Stats, avisos, botones según rol |
-| `MisNotas.test.tsx` | Listado de notas, promedio, estado vacío |
-| `MisEntregas.test.tsx` | Historial de entregas, contadores, estados |
-| `servicios.test.ts` | Capa de servicios: auth, materias, avisos, eventos |
+| Archivo                   | Cobertura                                          |
+| ------------------------- | -------------------------------------------------- |
+| `Login.test.tsx`          | Render, submit, error de credenciales              |
+| `ProtectedRoute.test.tsx` | Redirección sin sesión, render con sesión          |
+| `Sidebar.test.tsx`        | Ítems del menú según rol                           |
+| `Dashboard.test.tsx`      | Stats, avisos, botones según rol                   |
+| `MisNotas.test.tsx`       | Listado de notas, promedio, estado vacío           |
+| `MisEntregas.test.tsx`    | Historial de entregas, contadores, estados         |
+| `servicios.test.ts`       | Capa de servicios: auth, materias, avisos, eventos |
 
 ---
 
