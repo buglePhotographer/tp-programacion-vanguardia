@@ -1,18 +1,27 @@
 import time
 import logging
 from contextlib import asynccontextmanager
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.database import Base, engine
 from app.views import auth, materias, inscripciones, entregas, avisos, eventos
-from app.config import FRONTEND_URL
+from app.config import FRONTEND_URL, SENTRY_DSN, ENVIRONMENT
 from app.limiter import limiter
 from app.logging_config import setup_logging
 import app.models  # importa todos los modelos para que SQLAlchemy los registre
 
 setup_logging()
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment=ENVIRONMENT,
+        traces_sample_rate=0.2,
+        send_default_pii=False,
+    )
 logger = logging.getLogger(__name__)
 
 
