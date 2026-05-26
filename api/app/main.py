@@ -66,3 +66,8 @@ app.include_router(eventos.router)
 @app.get("/")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/sentry-test")
+def sentry_test():
+    raise Exception("Test de Sentry — si ves esto en el dashboard, funciona")
