@@ -7,8 +7,27 @@ on:
     branches: [master]
 
 jobs:
+  changes:
+    name: Detectar cambios
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'api/**'
+            frontend:
+              - 'app/**'
+
   test-backend:
     name: Tests backend
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,6 +49,8 @@ jobs:
 
   test-frontend:
     name: Tests frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,12 +69,19 @@ jobs:
 
   deploy:
     name: Deploy a Render
-    needs: [test-backend, test-frontend]
+    needs: [changes, test-backend, test-frontend]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    if: |
+      always() &&
+      github.ref == 'refs/heads/master' &&
+      github.event_name == 'push' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     steps:
       - name: Deploy backend
+        if: needs.changes.outputs.backend == 'true'
         run: curl -X POST "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
 
       - name: Deploy frontend
+        if: needs.changes.outputs.frontend == 'true'
         run: curl -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
