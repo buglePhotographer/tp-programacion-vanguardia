@@ -2,18 +2,22 @@ import time
 import logging
 from contextlib import asynccontextmanager
 import sentry_sdk
+import newrelic.agent
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.database import Base, engine
 from app.views import auth, materias, inscripciones, entregas, avisos, eventos
-from app.config import FRONTEND_URL, SENTRY_DSN, ENVIRONMENT
+from app.config import FRONTEND_URL, SENTRY_DSN, ENVIRONMENT, NEW_RELIC_LICENSE_KEY
 from app.limiter import limiter
 from app.logging_config import setup_logging
 import app.models  # importa todos los modelos para que SQLAlchemy los registre
 
 setup_logging()
+
+if NEW_RELIC_LICENSE_KEY:
+    newrelic.agent.initialize()
 
 if SENTRY_DSN:
     sentry_sdk.init(
@@ -71,3 +75,9 @@ def health():
 @app.get("/sentry-test")
 def sentry_test():
     raise Exception("Test de Sentry — si ves esto en el dashboard, funciona")
+
+
+@app.get("/newrelic-test")
+@newrelic.agent.function_trace()
+def newrelic_test():
+    return {"status": "ok", "message": "Si ves esta traza en New Relic, la integración funciona"}
