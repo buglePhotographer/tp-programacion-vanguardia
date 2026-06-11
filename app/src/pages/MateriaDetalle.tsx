@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { getMateria } from "../services/materias.service"
+import { getMateria, getAlumnosDeMateria, cargarNotaFinal } from "../services/materias.service"
 import { getTPs, crearTP, entregar, getEntregasPorTP, calificarEntrega } from "../services/entregas.service"
 import { getAvisosPorMateria, crearAviso, eliminarAviso } from "../services/avisos.service"
 
@@ -14,13 +14,18 @@ export default function MateriaDetalle() {
     const [nuevoAviso, setNuevoAviso] = useState({ titulo: "", contenido: "" })
     const [nuevoTP, setNuevoTP] = useState({ titulo: "", descripcion: "", fecha_entrega: "" })
     const [entregas, setEntregas] = useState<Record<number, any[]>>({})
+    const [alumnos, setAlumnos] = useState<any[]>([])
+    const [notaInput, setNotaInput] = useState<Record<number, string>>({})
 
     useEffect(() => {
         if (!id) return
         getMateria(Number(id)).then(r => setMateria(r.data))
         getTPs(Number(id)).then(r => setTps(r.data))
         getAvisosPorMateria(Number(id)).then(r => setAvisos(r.data))
-    }, [id])
+        if (user?.rol === "docente" || user?.rol === "admin") {
+            getAlumnosDeMateria(Number(id)).then(r => setAlumnos(r.data))
+        }
+    }, [id, user?.rol])
 
     async function handleCrearAviso(e: React.BaseSyntheticEvent) {
         e.preventDefault()
@@ -62,6 +67,16 @@ export default function MateriaDetalle() {
         if (nota === null) return
         await calificarEntrega(entrega_id, Number(nota), comentario)
         await verEntregas(tp_id)
+    }
+
+    async function handleCargarNota(inscripcion_id: number) {
+        const notaStr = notaInput[inscripcion_id]
+        const nota = Number(notaStr)
+        if (notaStr === "" || isNaN(nota) || nota < 0 || nota > 10) return
+        await cargarNotaFinal(inscripcion_id, nota)
+        const r = await getAlumnosDeMateria(Number(id))
+        setAlumnos(r.data)
+        setNotaInput(prev => ({ ...prev, [inscripcion_id]: "" }))
     }
 
     if (!materia) return (
@@ -323,6 +338,89 @@ export default function MateriaDetalle() {
                         </div>
                     )}
                 </section>
+
+                {/* Alumnos — solo docente/admin */}
+                {(user?.rol === "docente" || user?.rol === "admin") && (
+                    <section style={{ marginTop: "2rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: "1rem" }}>
+                            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#1a2035" }}>Alumnos</h2>
+                            <span style={{
+                                background: "#e8ecf4", color: "#6b7a99",
+                                borderRadius: 999, padding: ".1rem .55rem",
+                                fontSize: ".72rem", fontWeight: 600,
+                            }}>
+                                {alumnos.length}
+                            </span>
+                        </div>
+
+                        {alumnos.length === 0 ? (
+                            <div style={{ ...cardBase, padding: "1.5rem", textAlign: "center", color: "#6b7a99", fontSize: ".88rem" }}>
+                                Sin alumnos inscriptos.
+                            </div>
+                        ) : (
+                            <div style={{ ...cardBase, padding: 0, overflow: "hidden" }}>
+                                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                    <thead>
+                                        <tr style={{ background: "#f8fafc" }}>
+                                            <th style={thStyle}>Alumno</th>
+                                            <th style={thStyle}>Estado</th>
+                                            <th style={thStyle}>Nota final</th>
+                                            <th style={thStyle}>Cargar nota</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {alumnos.map(a => (
+                                            <tr key={a.id}>
+                                                <td style={tdStyle}>{a.estudiante?.nombre ?? "—"}</td>
+                                                <td style={tdStyle}>
+                                                    <span style={{
+                                                        ...(a.estado === "aprobada"
+                                                            ? { background: "#dcfce7", color: "#15803d" }
+                                                            : a.estado === "desaprobada"
+                                                                ? { background: "#fee2e2", color: "#b91c1c" }
+                                                                : { background: "#fef9c3", color: "#a16207" }
+                                                        ),
+                                                        fontSize: ".7rem", fontWeight: 700,
+                                                        padding: ".18rem .65rem", borderRadius: 999, letterSpacing: ".04em",
+                                                    }}>
+                                                        {a.estado}
+                                                    </span>
+                                                </td>
+                                                <td style={tdStyle}>
+                                                    {a.nota_final != null ? (
+                                                        <strong style={{ color: "#1a2035" }}>{a.nota_final}</strong>
+                                                    ) : (
+                                                        <span style={{ color: "#9ca3af", fontSize: ".82rem" }}>Sin nota</span>
+                                                    )}
+                                                </td>
+                                                <td style={tdStyle}>
+                                                    <div style={{ display: "flex", gap: ".4rem", alignItems: "center" }}>
+                                                        <input
+                                                            type="number"
+                                                            min={0}
+                                                            max={10}
+                                                            step={0.5}
+                                                            placeholder="0–10"
+                                                            value={notaInput[a.id] ?? ""}
+                                                            onChange={e => setNotaInput(prev => ({ ...prev, [a.id]: e.target.value }))}
+                                                            style={{ ...inputStyle, width: 70, padding: ".35rem .5rem" }}
+                                                        />
+                                                        <button
+                                                            onClick={() => handleCargarNota(a.id)}
+                                                            style={btnSmall}
+                                                        >
+                                                            Guardar
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </section>
+                )}
             </div>
         </div>
     )

@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.inscripcion import Inscripcion
+from app.models.inscripcion import Inscripcion, EstadoInscripcion
 from app.models.materia import Materia
 from app.schemas.inscripcion import InscripcionCreate, InscripcionResponse
 from app.auth import get_current_user
@@ -46,5 +46,6 @@ def cargar_nota_final(inscripcion_id: int, nota: float, db: Session = Depends(ge
     if not inscripcion:
         raise HTTPException(status_code=404, detail="Inscripción no encontrada")
     inscripcion.nota_final = nota
+    inscripcion.estado = EstadoInscripcion.aprobada if nota >= 7 else EstadoInscripcion.desaprobada
     db.commit()
     return {"ok": True}

@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from app.models.inscripcion import EstadoInscripcion
 from app.schemas.materia import MateriaResponse
+from app.schemas.usuario import UsuarioResponse
 
 
 class InscripcionCreate(BaseModel):
@@ -10,6 +11,7 @@ class InscripcionCreate(BaseModel):
 
 class InscripcionResponse(BaseModel):
     id: int
+    estudiante: UsuarioResponse
     materia: MateriaResponse
     estado: EstadoInscripcion
     nota_final: Optional[float]
